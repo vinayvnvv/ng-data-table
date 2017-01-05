@@ -1,0 +1,48 @@
+d-table {
+	width:100%;
+	display: block;
+    font-family: arial;
+    font-size: 12px;
+
+}
+d-table table {
+	width:100%;
+	outline:1px solid #2d3943;
+}
+
+d-table thead th {
+	background: #2d3943 !important;
+	padding:7px;
+}
+
+d-table tbody tr:nth-child(even) {
+      background:#f6f6f6;
+	}
+
+d-table tbody td {
+	padding:7px;
+	border-bottom:1px solid #d5d5d5;
+}
+
+
+
+.d-t-search {
+	text-align: right;
+	padding:4px;
+}
+.d-t-search input {
+	width:250px;
+	display: inline-block!important;
+}
+d-table .pager {
+	padding:7px;
+	text-align: right!important;
+	display: block;
+}
+d-table .page-num {
+	border: 1px solid #d9d9d9;
+	background:#f0f0f0;
+	padding: 5px;
+	margin: 2px;
+	cursor: pointer;
+}
