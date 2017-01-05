@@ -1,0 +1,22 @@
+<script type="text/javascript" src="node_modules/angular/angular.js"></script>
+<script type="text/javascript" src="app.js"></script>
+
+
+<body ng-app="app" ng-controller="appCtrl">
+
+<d-table t-data="data"> 
+
+<table-header>
+	<colm>one</colm>
+	<colm>Two</colm>
+</table-header>
+
+<table-body ng-if="data.age>13">
+<colm>{{data.name}}</colm>
+<colm>{{data.age}}</colm>
+</table-body>
+
+</d-table>
+
+
+</body>
