@@ -2,11 +2,12 @@ var app = angular.module('app', ['dTable']);
 app.controller('appCtrl', ['$scope', function($scope){
 
 	console.log("appctrl called")
-
-	$scope.data = [
+     $scope.data = {};
+	$scope.data.users = [
           {
           	name: "vinay",
-          	age:15
+          	age:15,
+               a :"bv"
           },
           {
           	name: "vinay",

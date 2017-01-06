@@ -9,16 +9,17 @@
 
 
 
-<d-table t-data="data"> 
+<d-table > 
 
 		<table-header>
 			<colm>one</colm>
 			<colm>Two</colm>
 		</table-header>
 
-		<table-body ng-iff="data.age>13" t-filter="data.age>13">
-		<colm>{{data.name}}</colm>
-		<colm>{{data.age}}</colm>
+		<table-body ng-repeat="d in data.users" t-filter="data.age>13">
+
+		<colm>{{d.name}}</colm>
+		<colm>{{d.age}}</colm>
 		</table-body>
 
 </d-table>
