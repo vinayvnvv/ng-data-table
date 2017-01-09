@@ -48,6 +48,51 @@ app.controller('appCtrl', ['$scope', function($scope){
           {
           	name:"last",
           	age:15
+          },
+           {
+               name: "vinay",
+               age:15,
+               a :"bv"
+          },
+          {
+               name: "yadav",
+               age:16
+          },
+          {
+               name: "yadav",
+               age:13
+          },
+          {
+               name: "yadav",
+               age:13
+          },
+          {
+               name: "yadav",
+               age:13
+          },
+          {
+               name: "yadav",
+               age:13
+          },
+          {
+               name: "yadav",
+               age:13
+          },
+          {
+               name: "yadav",
+               age:13
+          },
+          {
+               name: "yadav",
+               age:13
+          },
+          {
+               name: "yadav",
+               age:13
+          },
+          {
+               name:"last",
+               age:15
           }
 	];
 

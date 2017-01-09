@@ -5,21 +5,23 @@
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 
 <body ng-app="app" ng-controller="appCtrl">
-<div style="width:50%">
+<center>
+<div style="width:50%;text-align: center;">
 
 
 
-<d-table > 
+<d-table no-paginationS d-max-rows="7" d-pagination-position="bottom" d-search-position="top"> 
 
 		<table-header>
 			<colm>one</colm>
 			<colm>Two</colm>
 		</table-header>
 
-		<table-body ng-repeat="d in data.users" t-filter="data.age>13">
 
-		<colm>{{d.name}}</colm>
-		<colm>{{d.age}}</colm>
+
+		<table-body ng-repeat="d in data.users">
+			<colm>{{d.name}}</colm>
+			<colm>{{d.age}}</colm>
 		</table-body>
 
 </d-table>
@@ -28,6 +30,6 @@
 
 
 </div>
-
+</center>
 
 </body>

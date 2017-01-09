@@ -8,6 +8,7 @@ d-table {
 d-table table {
 	width:100%;
 	outline:1px solid #2d3943;
+	    margin-bottom: 11px;
 }
 
 d-table thead th {
@@ -35,14 +36,28 @@ d-table tbody td {
 	display: inline-block!important;
 }
 d-table .pager {
-	padding:7px;
 	text-align: right!important;
 	display: block;
+	margin:6px!important
 }
 d-table .page-num {
 	border: 1px solid #d9d9d9;
 	background:#f0f0f0;
-	padding: 5px;
+	padding: 5px 9px;
 	margin: 2px;
 	cursor: pointer;
+}
+
+d-table .page-num.active {
+	border: 1px solid #2d3943;
+	background:#2d3943;
+	color:#fff;
+	cursor: default;
+}
+
+d-table .page-num.disable {
+	border: 1px solid #f0f0f0;
+	background:none;
+	color:#999;
+	pointer-events: none;
 }
