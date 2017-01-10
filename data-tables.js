@@ -125,7 +125,9 @@ angular.module('dTable', [])
 									  	
 									  	//___c = ___c[0].childNodes;
 									  	//console.log(___c[0].childElementCount)
+
 									  	var trr = angular.element(___c[0])["0"].children;
+									  	console.log(___c)
 									  	var _e = {
 									  		tr:___c,
 									  		td:trr
@@ -200,8 +202,10 @@ angular.module('dTable', [])
 
             body = body[0].outerHTML;
             header = header[0].outerHTML;
-			header = header.replace(/colm/g, "th class='btn-primary'");
-			body = body.replace(/colm/g, "td");
+			header = header.replace(/<colm/g, "<th class='btn-primary'");
+			header = header.replace(/<\/colm>/g, "</th>");
+			body = body.replace(/<colm/g, "<td");
+			body = body.replace(/<\/colm>/g, "</td>");
 			body = body.replace(/table-body/g, "tr");
 
 
@@ -290,7 +294,7 @@ angular.module('dTable', [])
                 $scope.trHolder = get_updaters.tr;
                 $scope.tdArray = Array.prototype.slice.call(get_updaters.td);
                 $scope.filterTr(0);
-                //$scope.$apply();
+                $scope.$apply();
 
              	$scope.$watch(function(scope) { return 	$scope.$search},
 			              function(newValue, oldValue) {
