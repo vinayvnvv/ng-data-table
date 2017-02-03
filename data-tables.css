@@ -1,63 +1,105 @@
+
+
 d-table {
-	width:100%;
-	display: block;
+    width:100%;
+    display: block;
     font-family: arial;
     font-size: 12px;
 
 }
 d-table table {
-	width:100%;
-	outline:1px solid #2d3943;
-	    margin-bottom: 11px;
+    width:100%;
+    outline:1px solid #2d3943;
+        margin-bottom: 11px;
 }
 
 d-table thead th {
-	background: #2d3943 !important;
-	padding:7px;
+    background: #2d3943 !important;
+    padding:7px;
 }
+
+
 
 d-table tbody tr:nth-child(even) {
       background:#f6f6f6;
-	}
+    }
+d-table tbody tr:hover { 
+    background-color: #FFF8DC;
+} 
 
 d-table tbody td {
-	padding:7px;
-	border-bottom:1px solid #d5d5d5;
+    padding:7px;
+    border-bottom:1px solid #d5d5d5;
+    transition: .2s all;
 }
 
 
 
 .d-t-search {
-	text-align: right;
-	padding:4px;
+    text-align: right;
+    padding:4px;
 }
 .d-t-search input {
-	width:250px;
-	display: inline-block!important;
+    width:220px;
+    display: inline-block!important;
+    transition: 0.2s all;
+    border: 1px solid #d9d9d9;
+    border-radius: 2px;
+}
+.d-t-search input:focus {
+    width:250px;
+    box-shadow: none;
+    border:1px solid #999;
 }
 d-table .pager {
-	text-align: right!important;
-	display: block;
-	margin:6px!important
+    text-align: right!important;
+    display: block;
+    margin:6px!important
 }
 d-table .page-num {
-	border: 1px solid #d9d9d9;
-	background:#f0f0f0;
-	padding: 5px 9px;
-	margin: 2px;
-	cursor: pointer;
+    border: 1px solid #d9d9d9;
+    background:#f0f0f0;
+    padding: 5px 9px;
+    margin: 2px;
+    cursor: pointer;
+    border-radius: 1px;
 }
 
+d-table .page-num:hover {
+        transition: 0.3s all;
+        background: #d9d9d9;
+   
+    }
+
 d-table .page-num.active {
-	border: 1px solid #2d3943;
-	background:#2d3943;
-	color:#fff;
-	cursor: default;
+    border: 1px solid #2d3943;
+    background:#2d3943;
+    color:#fff;
+    cursor: default;
 }
 
 d-table .page-num.disable {
-	border: 1px solid #f0f0f0;
-	background:none;
-	color:#999;
-	pointer-events: none;
+    border: 1px solid #f0f0f0;
+    background:none;
+    color:#999;
+    pointer-events: none;
+}
+
+d-table table ._animi_from {
+	opacity:1;
+	transition: all 0.2s;
+	position: relative;
+	margin-top:-11px;
+}
+d-table table ._animi_end {
+	opacity:0;
+	transition: all 0.2s;
+	position: relative;
+	margin-top:0px;
+}
+d-table .no-rec {
+   border:1px solid #2d3943;
+   padding: 8px;
+   position: relative;
+   top:-11px;
 }

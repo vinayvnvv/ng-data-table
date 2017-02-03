@@ -1,4 +1,4 @@
-     .directive('dTable', function($timeout){
+.directive('dTable', function($timeout){
     // Runs during compile
     return {
         // name: '',
@@ -47,6 +47,13 @@
                 }
 
             $scope.goPage = function(n) {
+                //handle for last page clicked
+                 if(n == 'n')
+                    $scope.isLastPageLinkClicked = true;
+                 else
+                    $scope.isLastPageLinkClicked = false;
+
+
                  $scope.filterTr(n);
             }
 
@@ -55,6 +62,7 @@
             }
             $scope.prePage = function() {
                  $scope.filterTr($scope.currentPage - 1);
+                 console.log("go to pre of : " + $scope.currentPage)
             }
 
             $scope.doPagination = function(cur, n, ele) {
@@ -62,6 +70,12 @@
                     return;
 
                 var page_no_count;
+                //calculate no of page indexes to display
+                page_no_count = Math.ceil(n/$scope.pageItems);
+
+                ////handle for last page clicked for cur
+                if($scope.isLastPageLinkClicked)
+                    cur = page_no_count-1;
 
                 //styles
                 $scope.activePageStyle = [];
@@ -72,14 +86,13 @@
 
 
                 $scope.pageNum = [];
-                $scope.currentPage = cur;
+                $scope.currentPage = parseInt(cur);
 
                 console.log("cur:" + cur + ",n:" + n )
 
                  
 
-                //calculate no of page indexes to display
-                page_no_count = Math.ceil(n/$scope.pageItems);
+                
 
 
                 if(cur == 0)
@@ -88,8 +101,19 @@
                     $scope.disableNextStyle = "disable"
                 
                 for(var i=0;i<page_no_count;i++) {
-                        $scope.pageNum[i] = i+1;
+                        $scope.pageNum[i] = i;
                 }
+
+                //slice no of page links per to displayed
+                var dMaxLinks = $attrs.dMaxPageLinks;
+                if(dMaxLinks != undefined && dMaxLinks!= '') {
+                    if(dMaxLinks < page_no_count) {
+                        $scope.isMaxPageLink = true;
+                        $scope.pageNum = $scope.pageNum.slice(cur, (parseInt(dMaxLinks)+cur));
+                    }
+                }
+
+                console.log($scope.pageNum)
 
                 console.log("length of pages : " + page_no_count)
 
@@ -100,7 +124,11 @@
                 console.log(_l + "<--left")
                 console.log(_l + " : " + _r);
 
-                $scope.paginationInfo = "Showing " + (_l+1) + " to " + _r +" of " + n + " results";
+                var _r_max = _r;
+                if(_r>n)
+                    _r_max = n;
+
+                $scope.paginationInfo = "Showing " + (_l+1) + " to " + _r_max +" of " + n + " results";
                 console.log("page info:" + $scope.paginationInfo)
                 //console.log(n);
                 for(var i=0;i<ele.length;i++) {
@@ -163,7 +191,7 @@
                                                 
 
 
-                                            if(($scope.tdArray[k].innerText.toLowerCase().includes(srch))) {
+                                            if(($scope.tdArray[k].innerText.toLowerCase().replace(/[^0-9a-z\s]/gi, '').includes(srch))) {
                                                 //console.log($scope.tdArray[k].innerText + "->" + $scope.$search)
                                                  html_ += $scope.tdArray[k].outerHTML;
                                                  filtered_rows_no++
@@ -177,6 +205,18 @@
                                             return;
 
 
+            }
+
+            $scope.sortBy = function(field) {
+                $scope.$order = field;
+                var get_updaters = $scope.findUpdaters(); 
+                $scope.trHolder = get_updaters.tr;
+                $scope.tdArray = $scope.temp_tdArray;
+                console.log($scope.temp_tdArray);
+                $timeout(function() {
+                   $scope.filterTr(0); 
+               }, 1000);
+                //
             }
 
          
@@ -202,8 +242,9 @@
             for(var i=0;i<_c.length;i++) {
                         if(_c[i].localName == 'table-header')
                             header = angular.element(_c[i]);
-                        if(_c[i].localName == 'table-body')
+                        if(_c[i].localName == 'table-body') {   
                             body = angular.element(_c[i]);
+                        }
                     
             }
 
@@ -211,17 +252,21 @@
             header = header[0].outerHTML;
             header = header.replace(/<colm/g, "<th class='btn-primary'");
             header = header.replace(/<\/colm>/g, "</th>");
+            header = header.replace(/d-sort=["'](.*?)['"]/gi, "ng-click=\"sortBy('$1')\"");
             body = body.replace(/<colm/g, "<td");
             body = body.replace(/<\/colm>/g, "</td>");
             body = body.replace(/table-body/g, "tr");
 
 
-            var searchHtml = `<div class="d-t-search"><input type='text' class="form-control input-sm" ng-model='$search' placeholder="Search"/></div>`;
-            var paginationHtml = `<div class="pager" ng-if="!isNoPagination">
+            var searchHtml = `<div ng-show="tableLoaded" class="d-t-search"><input type='text' class="form-control input-sm" ng-model='$search' placeholder="Search"/></div>`;
+            var paginationHtml = `<div ng-show="tableLoaded" class="pager" ng-if="!isNoPagination">
+
             <span >{{paginationInfo}}</span>
+            <span ng-show="isMaxPageLink" ng-click="goPage(0)" class="page-num {{disablePrevStyle}}">First</span>
             <span ng-click="prePage()" class="page-num {{disablePrevStyle}}">Prev</span>
-            <span ng-click="goPage($index)" class="page-num {{activePageStyle[$index]}}" ng-repeat="p in pageNum">{{p}}</span>
+            <span ng-click="goPage(p)" class="page-num {{activePageStyle[p]}}" ng-repeat="p in pageNum">{{p+1}}</span>
             <span ng-click="nextPage()" ng-disable="true" class="page-num {{disableNextStyle}}">Next</span>
+            <span ng-show="isMaxPageLink" ng-click="goPage('n')" class="page-num {{disableNextStyle}}">Last</span>
 
             </div>`;
 
@@ -267,11 +312,12 @@
             var outerHtml = `
             ` + topHtml + `
             <table>
+            <span ng-hide="tableLoaded" class="loading-info"><b>Loading data... </b></span>
              <thead>
               <tr> ` + header + `
               </tr>
              </thead> 
-             <tbody id="tbody">
+             <tbody id="tbody" class="loading{{tableLoaded}}">
               ` + body + `
              </tbody> 
               </table> 
@@ -299,7 +345,9 @@
              post: function($scope, iElm) {
 
 
-                window.onload = init;
+
+
+                window.onload = init();
 
                 function init() {
                 var get_updaters = $scope.findUpdaters(); 
@@ -318,8 +366,10 @@
                 
                 console.log(get_updaters)
                 if(get_updaters.tr["0"].childElementCount > 0) {
+                    console.log("called")
                     $scope.trHolder = get_updaters.tr;
                     $scope.tdArray = Array.prototype.slice.call(get_updaters.td);
+                    $scope.temp_tdArray = get_updaters.td;
                     $scope.filterTr(0);
                     $scope.$apply();
                      $scope.$watch(function(scope) { return  $scope.$search},
@@ -332,13 +382,14 @@
                           
                           }
                   );
-                     $scope.contentLoaded = true;   
+                     $scope.tableLoaded = true;   
                     
                 }
                 else {
+                    console.log("claasd")
                     $timeout(function() {
                         init();
-                }, 2000);  
+                }, 0);  
                 }
                 
 
@@ -381,3 +432,155 @@
         }
     };
 });
+
+
+
+
+
+
+
+
+
+
+
+
+            <d-table no-paginationS d-max-rows="5" d-pagination-position="bottom" d-search-position="top" d-max-page-links="7" ng-init="$order = 'lender.contact_name'"> 
+
+        <table-header>
+                                  <colm ></colm>
+                                  <!-- <th nowrap>#</th> -->
+                                  <colm nowrap d-sort="program_type">Funding Program {{$order}}</colm>
+                                  <colm nowrap>Contact</colm>
+                                  <colm nowrap>Term</colm>
+                                  <colm nowrap>Time in Business</colm>
+                                  <colm nowrap class="text-right">Buy Rate</colm>
+                                  <colm nowrap class="text-right">Credit Score</colm>
+                                  
+                                  <colm nowrap class="text-right">Min Loan</colm>
+                                  <colm nowrap class="text-right">Max Loan</colm>
+        </table-header>
+
+
+
+        <table-body ng-repeat= "program in lendingProgramVm.lendingPrograms | orderObjectBy:$order:false track by $index" >
+
+                                  <colm style="width:7%" class="text-center"><i class="fa fa-check-circle " aria-hidden="true" ng-class='{ "circleGreen" :  program.program_status  == true   , "circleGray" :  program.program_status == false }'></i></colm>
+                                  <!-- <colm ng-click="lending_program_add_edit('edit' , dashboard_data)"><a >{{dashboard_data.id}}</a></colm> -->
+                                  <colm class="text-left"><a ng-href="#/lending-program-details/{{program.id}}">{{program.program_type}}</a></colm>
+                                  <colm class="text-left">{{program.lender.contact_name}}</colm>
+                                  <colm class="text-left" nowrap>{{program.max_duration >= 30 ? program.max_duration/30 : program.max_duration }} {{program.max_duration >= 30 ? "months" : "days"}}</colm>
+                                  <colm class="text-left">{{program.min_business_age >= 12 ? program.min_business_age/12 : program.min_business_age }} {{program.min_business_age >= 12 ? 'years' : 'months' }}</colm>
+                                  <colm class="text-left">{{program.interest | percentage:2}}</colm>
+                                  <colm class="text-left">{{program.min_credit_fico}}</colm>
+                                  
+                                  <colm class="text-left">{{program.min_deal_size | currency:'$':0}}</colm>
+                                  <colm class="text-left">{{program.max_deal_size   | currency:'$':0}}</colm>
+
+                               
+        </table-body>
+
+</d-table>
+
+
+
+d-table {
+    width:100%;
+    display: block;
+    font-family: arial;
+    font-size: 12px;
+
+}
+d-table table {
+    width:100%;
+    outline:1px solid #2d3943;
+        margin-bottom: 11px;
+}
+
+d-table thead th {
+    background: #2d3943 !important;
+    padding:7px;
+}
+
+
+
+d-table tbody tr:nth-child(even) {
+      background:#f6f6f6;
+    }
+d-table tbody tr:hover { 
+    background-color: #FFF8DC;
+} 
+
+d-table tbody td {
+    padding:7px;
+    border-bottom:1px solid #d5d5d5;
+    transition: .2s all;
+}
+
+
+
+.d-t-search {
+    text-align: right;
+    padding:4px;
+}
+.d-t-search input {
+    width:220px;
+    display: inline-block!important;
+    transition: 0.2s all;
+    border: 1px solid #d9d9d9;
+    border-radius: 2px;
+}
+.d-t-search input:focus {
+    width:250px;
+    box-shadow: none;
+    border:1px solid #999;
+}
+d-table .pager {
+    text-align: right!important;
+    display: block;
+    margin:6px!important
+}
+d-table .page-num {
+    border: 1px solid #d9d9d9;
+    background:#f0f0f0;
+    padding: 5px 9px;
+    margin: 2px;
+    cursor: pointer;
+    border-radius: 1px;
+}
+
+d-table .page-num:hover {
+        transition: 0.3s all;
+        background: #d9d9d9;
+   
+    }
+
+d-table .page-num.active {
+    border: 1px solid #2d3943;
+    background:#2d3943;
+    color:#fff;
+    cursor: default;
+}
+
+d-table .page-num.disable {
+    border: 1px solid #f0f0f0;
+    background:none;
+    color:#999;
+    pointer-events: none;
+}
+
+d-table tbody.loading {
+    display:block;
+    height:50px;
+    overflow:auto;
+    opacity:0;
+    transition: .4s all;    
+}
+d-table tbody.loadingtrue {
+    opacity:1;
+    transition: .7s all;    
+}
+d-table .loading-info {
+    position: relative;
+    top: 60px;
+    left: 47%;
+}

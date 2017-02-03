@@ -2,6 +2,7 @@
 <script type="text/javascript" src="app.js"></script>
 <script type="text/javascript" src="data-tables.js"></script>
 <link rel="stylesheet" href="data-tables.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.0/angular-animate.min.js"></script>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 
 <body ng-app="app" ng-controller="appCtrl">
@@ -10,21 +11,25 @@
 
 
 
-<d-table no-paginationS d-max-rows="7" d-pagination-position="bottom" d-search-position="top"> 
+<d-table no-pagination d-max-rows="12" d-pagination-position="top||bottom" d-search-position="top" d-max-page-links="5"> 
 
 		<table-header>
-			<colm>one</colm>
-			<colm>Two</colm>
+			<colm d-sort="firstName">one</colm>
+			<colm d-sort="lastName">Two</colm>
 		</table-header>
 
 
 
-		<table-body ng-repeat="d in data.users">
-			<colm>{{d.name}}</colm>
-			<colm>{{d.age}}</colm>
+		<table-body ng-repeat="d in customers" class="item" d-filtller="myFilter">
+			<colm>{{d.firstName}}</colm>
+			<colm>{{d.lastName}}</colm>
 		</table-body>
 
 </d-table>
+
+
+
+
 
 
 

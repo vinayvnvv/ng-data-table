@@ -1,184 +1,177 @@
 'use strict';
 
 angular.module('dTable', [])
-  .directive('dTable', function(){
+  .directive('dTable', function($timeout){
 	// Runs during compile
 	return {
 		// name: '',
 		// priority: 2,
 		// terminal: true,
-		 // scope: { }, // {} = isolate, true = child, false/undefined = no change
+		 // scope: {
+   //          dData : "&"
+		 //  }, // {} = isolate, true = child, false/undefined = no change
 		 controller: function($scope, $element, $attrs, $transclude) {
 
-		 	console.log("called pre dir")
-		 	$scope.filtered_data = null;
-		 	$scope.pageItems = $attrs.dMaxRows;
-		 	$scope.pageNum = [];
-		 	$scope.currentPage = null;
+		 	$scope.$reverse = false;
+		 	$scope.$currentPage = 0;
+		 	$scope.$pageSize = $attrs.dMaxRows;
 		 	$scope.isNoPagination = false;
 
-		 	if($attrs.noPagination != undefined) {
-		 		$scope.isNoPagination = true;
+            if($attrs.noPagination != undefined) {
+                $scope.isNoPagination = true;
+            }
+
+            
+
+            $scope.tbody = $element.find('tbody'); 
+
+
+
+		 	$scope.sortBy = function(field) {
+
+		 		$scope.$reverse = !$scope.$reverse;
+		 		$scope.$field = field;
+		 		$scope.filterPage(0);
 		 	}
 
+		 	 $scope.nextPage = function() {
+                 $scope.filterPage($scope.$currentPage + 1);
+            }
 
-		 	if($scope.pageItems == undefined || $scope.pageItems == '')
-		 		$scope.pageItems = 10;
-		 	
+             $scope.prePage = function() {
+                 $scope.filterPage($scope.$currentPage - 1);
+                 console.log("go to pre of : " + $scope.$currentPage)
+            }
 
-		 	$scope.searchObj = function searchObj (obj, query) {
 
-                console.log("searching...")
-		 		var temp = {};
+            $scope.animate = function() {
+            	console.log($scope.tbody)
+            	$scope.tbody.removeClass("_animi_from")
+            	$scope.tbody.addClass("_animi_end");
+            	$timeout(function() {
+            	   $scope.tbody.removeClass("_animi_end")
+                   $scope.tbody.addClass("_animi_from");
 
-				    for (var key in obj) {
-				         var value = obj[key];
+            	}, 200);
+            }
 
-				         if (typeof value === 'object') {
-				             searchObj(value, query);
-				         } else {
-				         	  value = String(value)
-					         if (value.includes(query)) {
-					             console.log('property=' + key + ' value=' + value);
-					         }
-				       }
-                        
-				        
 
-				    }
 
-				}
+		 	$scope.goPage = function(n) {
+                //handle for last page clicked
+                 if(n == 'n')
+                    $scope.isLastPageLinkClicked = true;
+                 else
+                    $scope.isLastPageLinkClicked = false;
 
-		    $scope.goPage = function(n) {
-		    	 $scope.filterTr(n);
-		    }
 
-		 	$scope.nextPage = function() {
-                 $scope.filterTr($scope.currentPage + 1);
-		 	}
-		 	$scope.prePage = function() {
-                 $scope.filterTr($scope.currentPage - 1);
-		 	}
+                 $scope.filterPage(n);
+            }
 
-		 	$scope.doPagination = function(cur, n, ele) {
+		 	$scope.doPagination = function(cur, n) {
 		 		if($scope.isNoPagination)
-		 			return;
-
-		 		var page_no_count;
-
-		 		//styles
-		 		$scope.activePageStyle = [];
-		 		$scope.activePageStyle[cur] = "active"
-
-		 		$scope.disablePrevStyle = null;
-		 		$scope.disableNextStyle = null;
+                    return;
+		 		 var page_no_count;
 
 
-		 		$scope.pageNum = [];
-		 		$scope.currentPage = cur;
+		 		  //calculate no of page indexes to display
+                page_no_count = Math.ceil(n/$scope.$pageSize);
 
-		 		console.log("cur:" + cur + ",n:" + n )
-
-		 		 
-
-                //calculate no of page indexes to display
-                page_no_count = Math.ceil(n/$scope.pageItems);
+                
+                ////handle for last page clicked for cur
+                if($scope.isLastPageLinkClicked)
+                    cur = page_no_count-1;
 
 
-                if(cur == 0)
-		 			$scope.disablePrevStyle = "disable";
-		 		if(cur == page_no_count-1)
-		 			$scope.disableNextStyle = "disable"
-		 	    
-		 	    for(var i=0;i<page_no_count;i++) {
-		 				$scope.pageNum[i] = i+1;
-		 	    }
-
-		 	    console.log("length of pages : " + page_no_count)
 
 
-		 		//console.log(ele)
-		 		var _l = cur*$scope.pageItems;
-		 		var _r = $scope.pageItems*(cur+1);
-		 		console.log(_l + "<--left")
-		 		console.log(_l + " : " + _r);
+		 		 //styles
+                $scope.activePageStyle = [];
+                $scope.activePageStyle[cur] = "active"
 
-		 		$scope.paginationInfo = "Showing " + (_l+1) + " to " + _r +" of " + n + " results";
-		 		console.log("page info:" + $scope.paginationInfo)
-		 		//console.log(n);
-		 		for(var i=0;i<ele.length;i++) {
-		 			if( ! ((_l<=i) && (_r>i)) )
-		 				ele[i].innerHTML = '';
-		 		}
-		 	}
+                $scope.disablePrevStyle = null;
+                $scope.disableNextStyle = null;
 
-		 	$scope.findUpdaters = function() {
-		 		//console.log("complile coun")
-		 		var _c = $element["0"].childNodes;
-					for(var i=0;i<_c.length;i++) {
-								if(_c[i].localName == 'table') {
-									$scope.tableH = angular.element(_c[i]);
-									var __c = $scope.tableH[0].childNodes;
-									  for(var j=0;j<__c.length;j++) {
-									  	if(__c[j].localName == 'tbody') {
-									  	var ___c = angular.element(__c[j]);
-									  	
-									  	//___c = ___c[0].childNodes;
-									  	//console.log(___c[0].childElementCount)
 
-									  	var trr = angular.element(___c[0])["0"].children;
-									  	console.log(___c)
-									  	var _e = {
-									  		tr:___c,
-									  		td:trr
-									  	};
-									  	return _e;
+                $scope.pageNum = [];
+                $scope.$currentPage = parseInt(cur);
 
-									   }
-									  }
-								}
-							
-					}
-		 	}
+                 if(cur == 0)
+                    $scope.disablePrevStyle = "disable";
+                if(cur == page_no_count-1)
+                    $scope.disableNextStyle = "disable"
 
-		 	$scope.filterTr = function(page_no) { 
-               	
-									  	//console.log($scope.tdArray);
-									  
-									  	//___c[0].innerHTML = trr[0].outerHTML;
-									  	// if(___c.length == 1) {
-									  	// 	console.log("length is one")
-									  	// 	//return;
-									  	// }
-									  	var filtered_rows_no = 0;
-									  	var len = ($scope.tdArray.length)
-									  	
-									  	
-									  	var html_ = '';
-									  	for(var k=0;k<len;k++) {
-									  		if(($scope.tdArray[k].innerText.includes($scope.$search))) {
-									  			//console.log($scope.tdArray[k].innerText + "->" + $scope.$search)
-									  			 html_ += $scope.tdArray[k].outerHTML;
-									  			 filtered_rows_no++
-									  			}
-									  	}
 
-									  	$scope.trHolder[0].innerHTML = html_;
-									  	console.log("loop:" + filtered_rows_no)
 
-									    $scope.doPagination(page_no,filtered_rows_no, $scope.findUpdaters().td);
-									  		return;
+                console.log("cur:" + cur + ",n:" + n )
+
+
+
+
+
+
+		 		 $scope.pageNum = [];
+
+
+                for(var i=0;i<page_no_count;i++) {
+                        $scope.pageNum[i] = i;
+                }
+
+
+
+
+                //slice no of page links per to displayed
+                var dMaxLinks = $attrs.dMaxPageLinks;
+                if(dMaxLinks != undefined && dMaxLinks!= '') {
+                    if(dMaxLinks < page_no_count) {
+                        $scope.isMaxPageLink = true;
+                        if( ((parseInt(dMaxLinks)+cur) > page_no_count )   ) {
+                        	$scope.pageNum = $scope.pageNum.slice(cur-((parseInt(dMaxLinks)+cur) - page_no_count ), (parseInt(dMaxLinks)+cur));
+                        } else {
+                        $scope.pageNum = $scope.pageNum.slice(cur, (parseInt(dMaxLinks)+cur));
+                    }
+                    }
+                }
+
+
+                //console.log(ele)
+                var _l = cur*$scope.$pageSize;
+                var _r = $scope.$pageSize*(cur+1);
+                console.log(_l + "<--left")
+                console.log(_l + " : " + _r);
+
+                var _r_max = _r;
+                if(_r>n)
+                    _r_max = n;
+
+                
+                if( (_l+1) > _r_max ) {
+                	$scope.paginationInfo = "No results Found ";
+                	$scope.disableNextStyle = "disable";
+                	$scope.disablePrevStyle = "disable";
+                } else {
+                	$scope.paginationInfo = "Showing " + (_l+1) + " to " + _r_max +" of " + n + " results";
+                }
+
+
+
 
 
 		 	}
 
-		 
+		 	$scope.filterPage = function(page) {
+		 		
+
+		 		$scope.$currentPage = page;
+
+		 		$scope.dDataSource = ($element["0"].attributes["d-data"].nodeValue);
 
 
-		 	
+		 		$scope.doPagination(page, $scope.filtered_search.length);
 
+		 		$scope.animate();
 
-
+		 	}
 
 		 	
 		 },
@@ -200,10 +193,33 @@ angular.module('dTable', [])
 					
 			}
 
+            var repeatString = body["0"].attributes["ng-repeat"].nodeValue;
+            var repeatData = repeatString.replace(/(.*) in (.*)/gi, "$2") + " ";
+            var repeatItem = repeatString.replace(/(.*) in (.*)/gi, "$1");
+
+            repeatData = repeatData.slice(0, repeatData.indexOf(' ')) ;
+            iElm.attr("d-data", repeatData)
+
+            //check if custom filter
+            if(body["0"].attributes["d-filter"] != undefined) {
+           		 var customFilter = (body["0"].attributes["d-filter"].nodeValue);
+         	 } else { var customFilter = undefined }
+            console.log(customFilter)
+            if(customFilter==undefined || customFilter == '') {
+            	customFilter = '';
+            } else {
+            	customFilter = " | " + customFilter;
+            }
+
+            console.log(customFilter);
+
+            repeatString = repeatItem +" in filtered = ( filtered_search = (" + repeatData + customFilter + " | filter:$search | orderBy:$field:$reverse) | startFrom:$currentPage*$pageSize | limitTo:$pageSize)";
+            body.attr("ng-repeat", repeatString);
             body = body[0].outerHTML;
             header = header[0].outerHTML;
 			header = header.replace(/<colm/g, "<th class='btn-primary'");
 			header = header.replace(/<\/colm>/g, "</th>");
+			header = header.replace(/d-sort=["'](.*?)['"]/gi, "ng-click=\"sortBy('$1')\"");
 			body = body.replace(/<colm/g, "<td");
 			body = body.replace(/<\/colm>/g, "</td>");
 			body = body.replace(/table-body/g, "tr");
@@ -212,11 +228,17 @@ angular.module('dTable', [])
 			var searchHtml = `<div class="d-t-search"><input type='text' class="form-control input-sm" ng-model='$search' placeholder="Search"/></div>`;
             var paginationHtml = `<div class="pager" ng-if="!isNoPagination">
             <span >{{paginationInfo}}</span>
+            <span ng-show="isMaxPageLink" ng-click="goPage(0)" class="page-num {{disablePrevStyle}}">First</span>
             <span ng-click="prePage()" class="page-num {{disablePrevStyle}}">Prev</span>
-            <span ng-click="goPage($index)" class="page-num {{activePageStyle[$index]}}" ng-repeat="p in pageNum">{{p}}</span>
+            <span ng-click="goPage(p)" class="page-num {{activePageStyle[p]}}" ng-repeat="p in pageNum">{{p+1}}</span>
             <span ng-click="nextPage()" ng-disable="true" class="page-num {{disableNextStyle}}">Next</span>
+            <span ng-show="isMaxPageLink" ng-click="goPage('n')" class="page-num {{disableNextStyle}}">Last</span>
 
             </div>`;
+            var noRecordsHtml = `<div ng-if="isNoRecords" class="no-rec">No results in the table</div>
+
+
+            `;
 
 
             //set defaults for handling exceptions and errors
@@ -264,12 +286,12 @@ angular.module('dTable', [])
 			  <tr> ` + header + `
 			  </tr>
 			 </thead> 
-			 <tbody ng-init="$search = ''">
+			 <tbody id="_animi_">
 			  ` + body + `
 			 </tbody> 
 			  </table> 
 
-              ` + bottomHtml + `
+              ` + bottomHtml + noRecordsHtml + `
 			`; 
 
 			return outerHtml;
@@ -277,57 +299,52 @@ angular.module('dTable', [])
 		// templateUrl: '',
 		// replace: true,
 		 //transclude: true,
-		compile: function($scope, tElement, tAttrs, transclude){
-
-            
-           return {
-
-           	pre: function($scope, iElm) {
-           		
-             	  
-           	},
-             
-             post: function($scope, iElm) {
-
-             	angular.element(document).ready(function () {
-                var get_updaters = $scope.findUpdaters();	
-                $scope.trHolder = get_updaters.tr;
-                $scope.tdArray = Array.prototype.slice.call(get_updaters.td);
-                $scope.filterTr(0);
-                $scope.$apply();
-
-             	$scope.$watch(function(scope) { return 	$scope.$search},
-			              function(newValue, oldValue) {
-			              
-			              	  	console.log($scope.$search)
-			              	  	$scope.filterTr(0);
-			              	  	//console.log($scope.tData.length)
-			                   // $scope.pageUpdate($scope.currentPage, $scope.tData.length)
-			              
-			              }
-                  );
-             	
-           }); 
-             
-
-
-
-
-
-             	
-                
-             }
-
-           };
-
-		},
 		link: function($scope, iElm, iAttrs, controller) {
 
 
-			       console.log("link")
+			      $scope.initCall = false;
+
+
 			
-                    $scope.getTrCount();
+                    $scope.$watch(function(scope) { return  $scope.$search},
+                          function(newValue, oldValue) {
+                          	if($scope.initCall)
+                          	$scope.filterPage(0);
+                          	$scope.animate();
+                          }
+                  );
+
+
+
+                    $scope.$watch('filtered', function (newValue, oldValue, scope) {
+                       if($scope.filtered) {
+                       		$scope.isNoPagination = false;
+                            if(!$scope.initCall) {
+                       			$scope.filterPage(0);
+                       			$scope.initCall = true;
+                         	} 
+                         	$scope.isNoRecords = false;
+                       	}
+                       	else {
+                           $scope.isNoPagination = true;
+                           $scope.isNoRecords = true;
+                       	}
+                       
+                 }, true);
+
+                    
+
+
+
 			
 		}
 	};
+})
+
+.filter('startFrom', function() {
+    return function(input, start) {
+        start = +start; //parse to int
+        if(input)
+        return input.slice(start);
+    }
 });
