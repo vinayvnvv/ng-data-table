@@ -10,3 +10,10 @@ _______________
 * Supports Animations
 * Supports Search and Pagination
 * Custom Styling
+
+________________
+
+### Limitations
+* Works only on Angular framework
+* Holds only for ng-repeat Data
+
